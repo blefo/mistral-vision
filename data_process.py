@@ -99,12 +99,15 @@ def load_data(dataset_name: str, transform: bool = False):
         def __len__(self):
             return len(self.dataset)
 
-        def __getitem__(self, idx):
+        def __getitem__(self, idx, minimalist: bool = False):
             image, label = self.dataset[idx]
             image = self.pil_transform(image)
             ascii_art = self.ascii_transform(image)
-            transformed_image = self.tensor_transform(F.to_tensor(image))
-            return (ascii_art, transformed_image), label
+            if not minimalist:
+                transformed_image = self.tensor_transform(F.to_tensor(image))
+                return (ascii_art, transformed_image), label
+            else:
+                return ascii_art, label
 
     train_dataset = CustomDataset(train_dataset, pil_transforms, tensor_transforms, ToAscii())
     valid_dataset = CustomDataset(valid_dataset, pil_transforms, tensor_transforms, ToAscii())
@@ -114,23 +117,33 @@ def load_data(dataset_name: str, transform: bool = False):
 
 
 def convert_and_save_to_dataframe(train_dataset, valid_dataset, test_dataset):
-    train_dataset_df_dict, valid_dataset_dict, test_dataset_dict = {'text': [], 'target': []}, {'text': [], 'target': []}, {'text': [], 'target': []}
-    max_size: int = max(train_dataset.__len__(), valid_dataset.__len__(), test_dataset.__len__())
+    train_dataset_text, train_dataset_target = [], []
+    valid_dataset_text, valid_dataset_target = [], []
+    test_dataset_text, test_dataset_target = [], []
+    train_dataset_df_len, valid_dataset_len, test_dataset_len = train_dataset.__len__(), valid_dataset.__len__(), test_dataset.__len__()
+    max_size: int = max(train_dataset_df_len, valid_dataset_len, test_dataset_len)
 
     for i in tqdm(range(max_size)):
-        if train_dataset.__getitem__(i):
-            train_dataset_df_dict['text'] = train_dataset.__getitem__(i)[0][0]
-            train_dataset_df_dict['target'] = train_dataset.__getitem__(i)[1]
+        if i <= train_dataset_df_len:
+            item_val = train_dataset.__getitem__(i, minimalist=True)
+            train_dataset_text.append(item_val[0])
+            train_dataset_target.append(item_val[1])
 
-        if valid_dataset.__getitem__(i):
-            valid_dataset_dict['text'] = valid_dataset.__getitem__(i)[0][0]
-            valid_dataset_dict['target'] = valid_dataset.__getitem__(i)[1]
+        if i <= valid_dataset_len:
+            item_val = valid_dataset.__getitem__(i, minimalist=True)
+            valid_dataset_text.append(item_val[0])
+            valid_dataset_target.append(item_val[1])
 
-        if test_dataset.__getitem__(i):
-            test_dataset_dict['text'] = test_dataset.__getitem__(i)[0][0]
-            test_dataset_dict['target'] = test_dataset.__getitem__(i)[1]
+        if i <= test_dataset_len:
+            item_val = test_dataset.__getitem__(i, minimalist=True)
+            test_dataset_text.append(item_val[0])
+            test_dataset_target.append(item_val[1])
 
-    train_dataset_df, valid_dataset_df, test_dataset_df = pd.DataFrame(train_dataset_df_dict),\
+    train_dataset_dict, valid_dataset_dict, test_dataset_dict = ({'text': train_dataset_text, 'target': train_dataset_target},
+                                                                 {'text': valid_dataset_text, 'target': valid_dataset_target},
+                                                                 {'text': test_dataset_text, 'target': test_dataset_target})
+
+    train_dataset_df, valid_dataset_df, test_dataset_df = pd.DataFrame(train_dataset_dict),\
                                                            pd.DataFrame(valid_dataset_dict),\
                                                            pd.DataFrame(test_dataset_dict)
 
@@ -142,12 +155,16 @@ if __name__ == '__main__':
 
     train_dataset, valid_dataset, test_dataset = convert_and_save_to_dataframe(train_dataset, valid_dataset, test_dataset)
 
+    train_dataset.to_csv('transformed_data/train.csv')
+    valid_dataset.to_csv('transformed_data/valid.csv')
+    test_dataset.to_csv('transformed_data/test.csv')
+
     # Example of accessing an image and its ASCII transformation
-    for i in range(3):
-        (ascii_art, transformed_image), label = train_dataset[i]
-        print(f"Label: {label}")
-        print("ASCII Art:")
-        print(ascii_art)  # The image is now an ASCII art string
-        print("Transformed Image Tensor:")
-        print(transformed_image)  # The image tensor after transformations
-        print("\n" + "=" * 50 + "\n")
+    # for i in range(3):
+    #     (ascii_art, transformed_image), label = train_dataset[i]
+    #     print(f"Label: {label}")
+    #     print("ASCII Art:")
+    #     print(ascii_art)  # The image is now an ASCII art string
+    #     print("Transformed Image Tensor:")
+    #     print(transformed_image)  # The image tensor after transformations
+    #     print("\n" + "=" * 50 + "\n")
