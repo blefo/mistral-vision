@@ -21,7 +21,7 @@ def format_dataset(row):
         ### Response:
         """,
             },
-            {"role": "assistant", "content": row["target"]},
+            {"role": "assistant", "content": str(row["target"])},
         ]
     }
     return finetuning_block
@@ -90,7 +90,7 @@ def generate_data(train_dataset: pd.DataFrame, valid_dataset: pd.DataFrame, test
 
 def save_as_jsonl(train_dataset_formatted, valid_dataset_formatted, test_dataset_formatted):
 
-    train_dataset_final, test_dataset_final = train_dataset_formatted + valid_dataset_formatted, test_dataset_formatted
+    train_dataset_final, test_dataset_final = train_dataset_formatted + valid_dataset_formatted, test_dataset_formatted[:150]
 
     with open("transformed_data/train.jsonl", "w") as f:
         for line in train_dataset_final:
