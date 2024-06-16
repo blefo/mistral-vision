@@ -231,6 +231,10 @@ def convert_and_save_to_dataframe(train_dataset, valid_dataset, test_dataset):
 
 
 if __name__ == '__main__':
+    '''
+        convert_and_save_to_dataframe_multiprocessing: 28 seconds with 39 cores
+        convert_and_save_to_dataframe: 14 minutes focusing on one core
+    '''
     train_dataset, valid_dataset, test_dataset = load_data("MNIST", True)
 
     train_dataset, valid_dataset, test_dataset = convert_and_save_to_dataframe_multiprocessing(train_dataset, valid_dataset, test_dataset)
