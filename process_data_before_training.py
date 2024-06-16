@@ -32,7 +32,7 @@ def worker(dataset, start, end, result_queue):
         dataset_formatted.append(format_dataset(row))
     result_queue.put(dataset_formatted)
 
-def generate_data_save_to_jsonl(train_dataset: pd.DataFrame, valid_dataset: pd.DataFrame, test_dataset: pd.DataFrame):
+def generate_data(train_dataset: pd.DataFrame, valid_dataset: pd.DataFrame, test_dataset: pd.DataFrame):
     num_processes = mp.cpu_count()  # Get number of processes
 
     # Create queues to store the results
@@ -85,18 +85,20 @@ def generate_data_save_to_jsonl(train_dataset: pd.DataFrame, valid_dataset: pd.D
     for process in processes:
         process.join()
 
-    with open("transformed_data/train.jsonl", "w") as f:
-        for line in train_dataset_formatted:
-            json.dump(line, f)
-            f.write("\n")
+    return train_dataset_formatted, valid_dataset_formatted, test_dataset_formatted
 
-    with open("transformed_data/valid.jsonl", "w") as f:
-        for line in valid_dataset_formatted:
+
+def save_as_jsonl(train_dataset_formatted, valid_dataset_formatted, test_dataset_formatted):
+
+    train_dataset_final, test_dataset_final = train_dataset_formatted + valid_dataset_formatted, test_dataset_formatted
+
+    with open("transformed_data/train.jsonl", "w") as f:
+        for line in train_dataset_final:
             json.dump(line, f)
             f.write("\n")
 
     with open("transformed_data/test.jsonl", "w") as f:
-        for line in test_dataset_formatted:
+        for line in test_dataset_final:
             json.dump(line, f)
             f.write("\n")
 
@@ -106,7 +108,9 @@ if __name__ == "__main__":
                                                   pd.read_csv('transformed_data/valid.csv', index_col=0),
                                                   pd.read_csv('transformed_data/test.csv', index_col=0))
 
-    generate_data_save_to_jsonl(train_dataset, valid_dataset, test_dataset)
+    train_dataset, valid_dataset, test_dataset = generate_data(train_dataset, valid_dataset, test_dataset)
+
+    save_as_jsonl(train_dataset, valid_dataset, test_dataset)
 
     print("------ Done and saved --------")
 
