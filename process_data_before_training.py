@@ -108,5 +108,5 @@ if __name__ == "__main__":
 
     generate_data_save_to_jsonl(train_dataset, valid_dataset, test_dataset)
 
-    print("train_dataset")
+    print("------ Done and saved --------")
 
