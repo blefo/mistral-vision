@@ -1,16 +1,17 @@
 import torch
 import torchvision
 import os
+import pandas as pd
 from PIL import Image
 import numpy as np
-import random
 from torchvision.transforms import functional as F
 from torchvision.transforms import v2
+from tqdm import tqdm
 
 
 # Function to convert an image to ASCII
 def image_to_ascii(image: Image.Image, width: int = 100, height: int = 50) -> str:
-    gray_scale = "@%#*+=-:. "
+    gray_scale = "&()!$€£/;@%#*+=-:. "
     image = image.resize((width, height))
     image = image.convert("L")  # Convert to grayscale
 
@@ -41,33 +42,51 @@ def load_data(dataset_name: str, transform: bool = False):
         # First set of transformations that work with PIL images
         pil_transforms = v2.Compose([
             v2.RandomResizedCrop(size=(224, 224), antialias=True),
-            v2.RandomHorizontalFlip(p=0.5)
+            v2.RandomHorizontalFlip(p=0.1)
         ])
 
         # Second set of transformations that work with tensors
         tensor_transforms = v2.Compose([
             v2.ToDtype(torch.float32, scale=True),
-            v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
         ])
     else:
         pil_transforms = v2.ToImage()
         tensor_transforms = v2.ToTensor()  # Convert image to tensor if no transformations are specified
 
-    # Load the dataset for the training/validation sets
-    train_valid_dataset = torchvision.datasets.FashionMNIST(root=dataset_dir,
-                                                            train=True,
-                                                            transform=None,
-                                                            download=True)
+    if dataset_name == "FashionMINST":
+        # Load the dataset for the training/validation sets
+        train_valid_dataset = torchvision.datasets.FashionMNIST(root=dataset_dir,
+                                                                train=True,
+                                                                transform=None,
+                                                                download=True)
 
-    # Split it into training and validation sets
-    nb_train = int((1.0 - valid_ratio) * len(train_valid_dataset))
-    nb_valid = int(valid_ratio * len(train_valid_dataset))
-    train_dataset, valid_dataset = torch.utils.data.dataset.random_split(train_valid_dataset, [nb_train, nb_valid])
+        # Split it into training and validation sets
+        nb_train = int((1.0 - valid_ratio) * len(train_valid_dataset))
+        nb_valid = int(valid_ratio * len(train_valid_dataset))
+        train_dataset, valid_dataset = torch.utils.data.dataset.random_split(train_valid_dataset, [nb_train, nb_valid])
 
-    # Load the test set
-    test_dataset = torchvision.datasets.FashionMNIST(root=dataset_dir,
-                                                     transform=None,
-                                                     train=False)
+        # Load the test set
+        test_dataset = torchvision.datasets.FashionMNIST(root=dataset_dir,
+                                                         transform=None,
+                                                         train=False)
+    elif dataset_name == "MNIST":
+        # Load the dataset for the training/validation sets
+        train_valid_dataset = torchvision.datasets.MNIST(root=dataset_dir,
+                                                                train=True,
+                                                                transform=None,
+                                                                download=True)
+
+        # Split it into training and validation sets
+        nb_train = int((1.0 - valid_ratio) * len(train_valid_dataset))
+        nb_valid = int(valid_ratio * len(train_valid_dataset))
+        train_dataset, valid_dataset = torch.utils.data.dataset.random_split(train_valid_dataset, [nb_train, nb_valid])
+
+        # Load the test set
+        test_dataset = torchvision.datasets.MNIST(root=dataset_dir,
+                                                         transform=None,
+                                                         train=False)
+
 
     # Apply the transformations on the fly in the dataset access
     class CustomDataset(torch.utils.data.Dataset):
@@ -94,8 +113,34 @@ def load_data(dataset_name: str, transform: bool = False):
     return train_dataset, valid_dataset, test_dataset
 
 
+def convert_and_save_to_dataframe(train_dataset, valid_dataset, test_dataset):
+    train_dataset_df_dict, valid_dataset_dict, test_dataset_dict = {'text': [], 'target': []}, {'text': [], 'target': []}, {'text': [], 'target': []}
+    max_size: int = max(train_dataset.__len__(), valid_dataset.__len__(), test_dataset.__len__())
+
+    for i in tqdm(range(max_size)):
+        if train_dataset.__getitem__(i):
+            train_dataset_df_dict['text'] = train_dataset.__getitem__(i)[0][0]
+            train_dataset_df_dict['target'] = train_dataset.__getitem__(i)[1]
+
+        if valid_dataset.__getitem__(i):
+            valid_dataset_dict['text'] = valid_dataset.__getitem__(i)[0][0]
+            valid_dataset_dict['target'] = valid_dataset.__getitem__(i)[1]
+
+        if test_dataset.__getitem__(i):
+            test_dataset_dict['text'] = test_dataset.__getitem__(i)[0][0]
+            test_dataset_dict['target'] = test_dataset.__getitem__(i)[1]
+
+    train_dataset_df, valid_dataset_df, test_dataset_df = pd.DataFrame(train_dataset_df_dict),\
+                                                           pd.DataFrame(valid_dataset_dict),\
+                                                           pd.DataFrame(test_dataset_dict)
+
+    return train_dataset_df, valid_dataset_df, test_dataset_df
+
+
 if __name__ == '__main__':
-    train_dataset, valid_dataset, test_dataset = load_data("FashionMNIST", True)
+    train_dataset, valid_dataset, test_dataset = load_data("MNIST", True)
+
+    train_dataset, valid_dataset, test_dataset = convert_and_save_to_dataframe(train_dataset, valid_dataset, test_dataset)
 
     # Example of accessing an image and its ASCII transformation
     for i in range(3):
