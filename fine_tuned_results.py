@@ -43,6 +43,7 @@ if __name__ == "__main__":
     # Init the validation data
     validation_data = pd.read_csv('transformed_data/test.csv', index_col=0)[150:]
     validation_data = validation_data.reset_index(drop=True)
+    validation_data = validation_data[:3000]
     validation_data['llm_input'] = validation_data[['text']].apply(lambda x: prompt(x), axis=1)
 
     results = []
