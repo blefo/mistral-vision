@@ -7,6 +7,11 @@ You can use the fine-tuned model using the Mistral's API querying the associated
 Mistral-7b job id: be2e7a1c-21e3-458a-881c-9d9adca22cef
 
 
+## Training Hardware
+
+The data processing has been made using Nvidia GPU. The computation was distributed among 40 cores.
+
+
 ## Getting Started
 
 These instructions will guide you through the process of setting up and running this project on your local machine for development and testing purposes.
