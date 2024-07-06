@@ -22,27 +22,30 @@ graph TD
     A([MNIST/Fashion MNIST Images]):::data --> B[Split Data]:::process
     B --> DP
     subgraph DP[Distributed Processing - 40 CPU Cores]
-        D1[Worker 1]:::distributed --> E1[Data Chunk 1]:::data
-        D2[Worker 2]:::distributed --> E2[Data Chunk 2]:::data
-        D3[Worker 3]:::distributed --> E3[Data Chunk 3]:::data
-        D4[Worker N]:::distributed --> E4[Data Chunk 4]:::data
-        E1[Data Chunk 1]:::data --> C1[Convert to ASCII]:::process
-        E2[Data Chunk 2]:::data --> C2[Convert to ASCII]:::process
-        E3[Data Chunk 3]:::data --> C3[Convert to ASCII]:::process
-        E4[Data Chunk N]:::data --> C4[Convert to ASCII]:::process
-        C1[Convert to ASCII]:::data --> F1[Format ASCII as Prompts]:::process
-        C2[Convert to ASCII]:::data --> F2[Format ASCII as Prompts]:::process
-        C3[Convert to ASCII]:::data --> F3[Format ASCII as Prompts]:::process
-        C4[Convert to ASCII]:::data --> F4[Format ASCII as Prompts]:::process
+        B --> D1[Worker 1]:::distributed
+        B --> D2[Worker 2]:::distributed
+        B --> D3[Worker 3]:::distributed
+        B --> D4[Worker N]:::distributed
+        D1 --> E1[Data Chunk 1]:::data
+        D2 --> E2[Data Chunk 2]:::data
+        D3 --> E3[Data Chunk 3]:::data
+        D4 --> E4[Data Chunk N]:::data
+        E1 --> C1[Convert to ASCII]:::process
+        E2 --> C2[Convert to ASCII]:::process
+        E3 --> C3[Convert to ASCII]:::process
+        E4 --> C4[Convert to ASCII]:::process
+        C1 --> F1[Format ASCII as Prompts]:::process
+        C2 --> F2[Format ASCII as Prompts]:::process
+        C3 --> F3[Format ASCII as Prompts]:::process
+        C4 --> F4[Format ASCII as Prompts]:::process
     end
     F1 --> F[Combine Results]:::distributed
-    F2 --> F[Combine Results]:::distributed
-    F3 --> F[Combine Results]:::distributed
-    F4 --> F[Combine Results]:::distributed
+    F2 --> F
+    F3 --> F
+    F4 --> F
     F --> I[Fine-tune Mistral LLM]:::model
     I --> J[Inference with Fine-tuned Model]:::model
-    J --> K([New image]):::data
-
+    J -.-> K([New image]):::data
 ```
 
 ## Key Components
