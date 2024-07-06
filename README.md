@@ -19,22 +19,30 @@ graph TD
     classDef process fill:#98FB98,stroke:#333,stroke-width:2px;
     classDef model fill:#87CEFA,stroke:#333,stroke-width:2px;
     classDef distributed fill:#DDA0DD,stroke:#333,stroke-width:2px;
-
-    A[MNIST/Fashion MNIST Images]:::data --> B
-    subgraph DP[Distributed Processing]
-        B[Convert to ASCII Art]:::process
-        C[Format ASCII as Prompts]:::process
-        D[Multi-threaded Data Handling]:::distributed
-        B --> C
-        D -->|Parallelization| B
-        D -->|Parallelization| C
+    A([MNIST/Fashion MNIST Images]):::data --> B[Split Data]:::process
+    B --> DP
+    subgraph DP[Distributed Processing - 40 CPU Cores]
+        D1[Worker 1]:::distributed --> E1[Data Chunk 1]:::data
+        D2[Worker 2]:::distributed --> E2[Data Chunk 2]:::data
+        D3[Worker 3]:::distributed --> E3[Data Chunk 3]:::data
+        D4[Worker N]:::distributed --> E4[Data Chunk 4]:::data
+        E1[Data Chunk 1]:::data --> C1[Convert to ASCII]:::process
+        E2[Data Chunk 2]:::data --> C2[Convert to ASCII]:::process
+        E3[Data Chunk 3]:::data --> C3[Convert to ASCII]:::process
+        E4[Data Chunk N]:::data --> C4[Convert to ASCII]:::process
+        C1[Convert to ASCII]:::data --> F1[Format ASCII as Prompts]:::process
+        C2[Convert to ASCII]:::data --> F2[Format ASCII as Prompts]:::process
+        C3[Convert to ASCII]:::data --> F3[Format ASCII as Prompts]:::process
+        C4[Convert to ASCII]:::data --> F4[Format ASCII as Prompts]:::process
     end
-    C --> E[Prepare Training Data]:::process
-    E --> F[Fine-tune Mistral LLM]:::model
-    F --> G[Inference with Fine-tuned Model]:::model
-    G -.->|New image for classification| B
+    F1 --> F[Combine Results]:::distributed
+    F2 --> F[Combine Results]:::distributed
+    F3 --> F[Combine Results]:::distributed
+    F4 --> F[Combine Results]:::distributed
+    F --> I[Fine-tune Mistral LLM]:::model
+    I --> J[Inference with Fine-tuned Model]:::model
+    J --> K([New image]):::data
 
-    H[40 CPU Cores]:::distributed -->|Distribute workload| D
 ```
 
 ## Key Components
