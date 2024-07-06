@@ -65,6 +65,6 @@ if __name__ == "__main__":
 
     print('''------ Saving File --------''')
 
-    validation_data.to_csv('transformed_data/results_on_validation.csv')
+    # validation_data.to_csv('transformed_data/results_on_validation.csv')
 
     print('''------ Experiment Done --------''')

@@ -1,0 +1,14 @@
+transformed_data/valid.jsonl
+transformed_data/valid.csv
+transformed_data/train.jsonl
+transformed_data/train.csv
+transformed_data/test.jsonl
+transformed_data/test.csv
+transformed_data/results_on_validation.csv
+transformed_data/results_on_validation_v2.csv
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/vcs.xml
+.idea/modules.xml
+.idea/mistral-vision.iml
+.idea/misc.xml
+.idea/deployment.xml
