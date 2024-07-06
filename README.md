@@ -116,13 +116,4 @@ Feedback and contributions are welcome. Feel free to open an issue or submit a p
 
 - Build a new tokenizer for handling the ASCII characters more efficiently
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
-## Acknowledgments
-
-- MistralAI for their language models and API
-- The creators of the MNIST and FashionMNIST datasets
-
 ---
