@@ -11,6 +11,32 @@ Mistral Vision is an experimental project that explores the potential of fine-tu
 3. **Fine-tuning**: Fine-tune the Mistral model on the ASCII-based dataset.
 4. **Inference**: Use the fine-tuned model to classify new ASCII art representations.
 
+Below is the graph detailing the process.
+
+```mermaid
+graph TD
+    classDef data fill:#FFA07A,stroke:#333,stroke-width:2px;
+    classDef process fill:#98FB98,stroke:#333,stroke-width:2px;
+    classDef model fill:#87CEFA,stroke:#333,stroke-width:2px;
+    classDef distributed fill:#DDA0DD,stroke:#333,stroke-width:2px;
+
+    A[MNIST/Fashion MNIST Images]:::data --> B
+    subgraph DP[Distributed Processing]
+        B[Convert to ASCII Art]:::process
+        C[Format ASCII as Prompts]:::process
+        D[Multi-threaded Data Handling]:::distributed
+        B --> C
+        D -->|Parallelization| B
+        D -->|Parallelization| C
+    end
+    C --> E[Prepare Training Data]:::process
+    E --> F[Fine-tune Mistral LLM]:::model
+    F --> G[Inference with Fine-tuned Model]:::model
+    G -.->|New image for classification| B
+
+    H[40 CPU Cores]:::distributed -->|Distribute workload| D
+```
+
 ## Key Components
 
 - Image to ASCII conversion
@@ -26,6 +52,10 @@ Mistral Vision is an experimental project that explores the potential of fine-tu
 - `fine_tuned_results.py`: Inference using the fine-tuned model
 - `render_results.py`: Performance analysis and visualization
 - `reformat_data.py`: Data reformatting utility
+
+## Distributed Data Processing
+A key feature of this project is its highly efficient data handling system. The data processing pipeline is designed to leverage multi-core processors, distributing the workload across multiple threads. This approach significantly reduces processing time, especially when dealing with large datasets like MNIST and FashionMNIST. The multi-threaded design allows for parallel processing of image conversion, ASCII transformation, and data formatting, showcasing scalable data handling techniques essential for large-scale machine learning projects.
+
 
 ## Getting Started
 
